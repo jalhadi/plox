@@ -1,4 +1,4 @@
-from token import Token
+from token_2 import Token
 from tokenType import TokenType
 
 keywords = {
@@ -109,7 +109,7 @@ class Scanner:
             return
 
         self.advance()
-        value = self.source(self.start + 1, self.current - 1)
+        value = self.source[self.start + 1:self.current - 1]
         self.addToken(TokenType.STRING, value)
 
     def identifier(self):
