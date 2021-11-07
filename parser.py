@@ -2,8 +2,10 @@ from expression import Binary, Unary, Literal, Grouping
 from tokenType import TokenType
 from plox import Lox
 
+
 class ParseError(Exception):
     pass
+
 
 class Parser:
     def __init__(self, tokens):
@@ -32,7 +34,12 @@ class Parser:
 
     def comparison(self):
         expr = self.term()
-        while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
+        while self.match(
+            TokenType.GREATER,
+            TokenType.GREATER_EQUAL,
+            TokenType.LESS,
+            TokenType.LESS_EQUAL,
+        ):
             operator = self.previous()
             right = self.term()
             expr = Binary(expr, operator, right)
@@ -132,4 +139,3 @@ class Parser:
                 return
 
             self.advance()
-

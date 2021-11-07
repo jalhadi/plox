@@ -1,6 +1,7 @@
 class Expr:
     pass
 
+
 class Binary(Expr):
     def __init__(self, left, operator, right):
         self.left = left
@@ -10,12 +11,14 @@ class Binary(Expr):
     def accept(self, visitor):
         return visitor.visitBinaryExpr(self)
 
+
 class Grouping(Expr):
     def __init__(self, expression):
         self.expression = expression
 
     def accept(self, visitor):
         return visitor.visitGroupingExpr(self)
+
 
 class Literal(Expr):
     def __init__(self, value):
@@ -24,8 +27,9 @@ class Literal(Expr):
     def accept(self, visitor):
         return visitor.visitLiteralExpr(self)
 
+
 class Unary(Expr):
-    def __init__(self, operator,  right):
+    def __init__(self, operator, right):
         self.operator = operator
         self.right = right
 

@@ -9,4 +9,4 @@ class Token:
         self.line = line
 
     def toString(self):
-        return '{} {} {}'.format(self.type, self.lexeme, self.literal)
+        return "{} {} {}".format(self.type, self.lexeme, self.literal)
