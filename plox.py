@@ -1,22 +1,7 @@
 import sys
 from scanner import Scanner
+from parser import Parser
 
-def run(line):
-    scanner = Scanner(line)
-    tokens = scanner.scanTokens()
-    for token in tokens:
-        print(token)
-
-def runFile(filePath):
-    with open(filePath) as f:
-        read_data = f.read()
-
-def runPrompt():
-    while True:
-        line = input('plox > ')
-        if line == '':
-            break;
-        run(line)
 
 class Lox:
     hadError = False
@@ -35,8 +20,11 @@ class Lox:
     def run(self, line):
         scanner = Scanner(line)
         tokens = scanner.scanTokens()
-        for token in tokens:
-            print(token.toString())
+        parser = Parser(tokens)
+        expression = parser.parse()
+        if hadError:
+            return
+        # Implement AstPrinter
 
     def runFile(self, filePath):
         with open(filePath) as f:
@@ -57,6 +45,12 @@ class Lox:
 
     def error(self, line, message):
         self.report(line, '', message)
+
+    def tokenError(self, token, message):
+        if token.type == TokenType.EOF:
+            self.report(token.line, " at end ", message)
+        else:
+            self.report(token.line, f" at '{token.lexeme}'", message)
 
     def report(self, line, where, message):
         print('[{}] Error {}: {}'.format(line, where, message))

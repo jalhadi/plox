@@ -1,5 +1,6 @@
 from token_2 import Token
 from tokenType import TokenType
+from plox import Lox
 
 keywords = {
     'and': TokenType.AND,
