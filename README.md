@@ -1,4 +1,4 @@
-### Plox - (In Progress) Python implementation of Lox
+### Plox - (In Progress) Python tree-walk interpreter implementation of [Lox](http://craftinginterpreters.com/)
 
 ### Setup
 ```
