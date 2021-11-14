@@ -1,6 +1,6 @@
 from expression import Binary, Unary, Literal, Grouping
 from tokenType import TokenType
-from plox import Lox
+from error import Error
 
 
 class ParseError(Exception):
@@ -83,7 +83,7 @@ class Parser:
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Grouping(expr)
 
-    raise self.error(self.peek(), "Expect expression.")
+        raise self.error(self.peek(), "Expect expression.")
 
     def consume(self, token_type, message):
         if self.check(token_type):
@@ -116,8 +116,8 @@ class Parser:
     def previous(self):
         return self.tokens[self.current - 1]
 
-    def error(token, message):
-        Lox.tokenError(token, message)
+    def error(self, token, message):
+        Error.tokenError(token, message)
         return ParseError()
 
     def synchronize(self):

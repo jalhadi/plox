@@ -1,6 +1,6 @@
 from token_2 import Token
 from tokenType import TokenType
-from plox import Lox
+from error import Error
 
 keywords = {
     "and": TokenType.AND,
@@ -87,7 +87,7 @@ class Scanner:
             elif self.isAlpha(c):
                 self.identifier()
             else:
-                Lox.error(self.line, "Unexpected character.")
+                Error.error(self.line, "Unexpected character.")
 
     def match(self, expected):
         if self.isAtEnd():
@@ -125,7 +125,7 @@ class Scanner:
             self.advance()
 
         if self.isAtEnd():
-            Lox.error(self.line, "Unterminated string.")
+            Error.error(self.line, "Unterminated string.")
             return
 
         self.advance()

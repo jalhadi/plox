@@ -1,13 +1,12 @@
 import sys
+from error import Error
+from ast_printer import AstPrinter
 from scanner import Scanner
 from parser import Parser
 
 
 class Lox:
-    hadError = False
-
     def __init__(self):
-        # self.hadError = False
         if sys.version_info[0] < 3:
             raise Exception("Python 3 or a more recent version is required.")
         if len(sys.argv) > 2:
@@ -23,15 +22,16 @@ class Lox:
         tokens = scanner.scanTokens()
         parser = Parser(tokens)
         expression = parser.parse()
-        if hadError:
+        if Error.hadError:
             return
         # Implement AstPrinter
+        print(AstPrinter().print(expression))
 
     def runFile(self, filePath):
         with open(filePath) as f:
             read_data = f.read()
             self.run(read_data)
-            if hadError:
+            if Error.hadError:
                 sys.exit(65)
 
     def runPrompt(self):
@@ -42,20 +42,8 @@ class Lox:
             self.run(line)
             # If there was an error in an interactive session
             # reset the error and don't kill the whole session
-            hadError = False
-
-    def error(self, line, message):
-        self.report(line, "", message)
-
-    def tokenError(self, token, message):
-        if token.type == TokenType.EOF:
-            self.report(token.line, " at end ", message)
-        else:
-            self.report(token.line, " at '{}'".format(token.lexeme), message)
-
-    def report(self, line, where, message):
-        print("[{}] Error {}: {}".format(line, where, message))
-        hadError = True
+            # hadError = False
+            Error.hadError = False
 
 
 if __name__ == "__main__":
