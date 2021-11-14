@@ -51,7 +51,7 @@ class Lox:
         if token.type == TokenType.EOF:
             self.report(token.line, " at end ", message)
         else:
-            self.report(token.line, f" at '{token.lexeme}'", message)
+            self.report(token.line, " at '{}'".format(token.lexeme), message)
 
     def report(self, line, where, message):
         print("[{}] Error {}: {}".format(line, where, message))
