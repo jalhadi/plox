@@ -3,9 +3,14 @@ from tokenType import TokenType
 
 class Error:
     hadError = False
+    hadRuntimeError = False
 
     def error(line, message):
         Error.report(line, "", message)
+
+    def runtimeError(error):
+        print("{}\n[line {}]".format(error.message, error.token.line))
+        hadRuntimeError = True
 
     def tokenError(token, message):
         if token.type == TokenType.EOF:
