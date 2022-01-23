@@ -1,4 +1,4 @@
-from tokenType import TokenType
+from token_type import TokenType
 
 
 class Error:

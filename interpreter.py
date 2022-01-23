@@ -1,15 +1,22 @@
-from tokenType import TokenType
+from token_type import TokenType
 from error import Error
 from custom_runtime_error import CustomRuntimeError
+from environment import Environment
 
 
 class Interpreter:
-    def interpret(self, expression):
+    def __init__(self):
+        self.environment = Environment()
+
+    def interpret(self, statements):
         try:
-            value = self.evaluate(expression)
-            print(stringify(value))
+            for stmt in statements:
+                self.execute(stmt)
         except CustomRuntimeError as err:
             Error.runtimeError(err)
+
+    def execute(self, stmt):
+        stmt.accept(self)
 
     def evaluate(self, expr):
         return expr.accept(self)
@@ -32,6 +39,9 @@ class Interpreter:
 
         # Unreachable
         return None
+
+    def visitVariableExpr(self, expr):
+        return self.environment.get(expr.name)
 
     def visitBinaryExpr(self, expr):
         left = self.evaluate(expr.left)
@@ -73,6 +83,37 @@ class Interpreter:
             return isEqual(left, right)
         # Unreachable
         return None
+
+    def visitExpressionStmt(self, stmt):
+        self.evaluate(stmt.expression)
+
+    def visitPrintStmt(self, stmt):
+        value = self.evaluate(stmt.expression)
+        print(str(value))
+
+    def visitVarStmt(self, stmt):
+        value = None
+        if stmt.initializer is not None:
+            value = self.evaluate(stmt.initializer)
+
+        self.environment.define(stmt.name.lexeme, value)
+
+    def visitAssignExpr(self, expr):
+        value = self.evaluate(expr.value)
+        self.environment.assign(expr.name, value)
+        return value
+
+    def visitBlockStmt(self, stmt):
+        self.executeBlock(stmt.statements, Environment(enclosing=self.environment))
+
+    def executeBlock(self, statements, environment):
+        previous = self.environment
+        try:
+            self.environment = environment
+            for stmt in statements:
+                self.execute(stmt)
+        finally:
+            self.environment = previous
 
 
 def stringify(value):

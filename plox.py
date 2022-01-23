@@ -15,7 +15,7 @@ class Lox:
             print("Usage: python3 plox.py [script]")
             sys.exit(64)
         elif len(sys.argv) > 1:
-            self.runFile(sys.argv[0])
+            self.runFile(sys.argv[1])
         else:
             self.runPrompt()
 
@@ -23,11 +23,11 @@ class Lox:
         scanner = Scanner(line)
         tokens = scanner.scanTokens()
         parser = Parser(tokens)
-        expression = parser.parse()
+        statements = parser.parse()
         if Error.hadError:
             return
         # Implement AstPrinter
-        self.interpreter.interpret(expression)
+        self.interpreter.interpret(statements)
 
     def runFile(self, filePath):
         with open(filePath) as f:

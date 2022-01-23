@@ -1,5 +1,5 @@
 from token_2 import Token
-from tokenType import TokenType
+from token_type import TokenType
 from error import Error
 
 keywords = {
