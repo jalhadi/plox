@@ -84,12 +84,27 @@ class Interpreter:
         # Unreachable
         return None
 
+    def visitLogicalExpr(self, expr):
+        left = self.evaluate(expr.left)
+        if expr.operator == TokenType.OR:
+            if isTruthy(left):
+                return left
+        if expr.operator == TokenType.AND:
+            if not isTruthy(left):
+                return left
+
+        return self.evaluate(expr.right)
+
     def visitExpressionStmt(self, stmt):
         self.evaluate(stmt.expression)
 
     def visitPrintStmt(self, stmt):
         value = self.evaluate(stmt.expression)
         print(str(value))
+
+    def visitWhileStmt(self, stmt):
+        while isTruthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.body)
 
     def visitVarStmt(self, stmt):
         value = None
@@ -105,6 +120,12 @@ class Interpreter:
 
     def visitBlockStmt(self, stmt):
         self.executeBlock(stmt.statements, Environment(enclosing=self.environment))
+
+    def visitIfStmt(self, stmt):
+        if isTruthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.thenBranch)
+        elif stmt.elseBranch is not None:
+            self.execute(stmt.elseBranch)
 
     def executeBlock(self, statements, environment):
         previous = self.environment

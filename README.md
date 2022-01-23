@@ -2,7 +2,7 @@
 
 ### Setup
 ```bash
-$ python3 -m venv .venv
+$ python3 -m venv .venv # Tested with Python 3.9.7
 $ source .venv/bin/activate
 $ pip install -r requirements-dev.txt
 $ pre-commit install
