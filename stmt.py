@@ -1,5 +1,6 @@
 class Stmt:
-    pass
+    def accept(self, visitor):
+        raise NotImplementedError
 
 
 class Expression(Stmt):
@@ -52,3 +53,22 @@ class While(Stmt):
 
     def accept(self, visitor):
         return visitor.visitWhileStmt(self)
+
+
+class Function(Stmt):
+    def __init__(self, name, params, body):
+        self.name = name
+        self.params = params
+        self.body = body
+
+    def accept(self, visitor):
+        return visitor.visitFunctionStmt(self)
+
+
+class Return(Stmt):
+    def __init__(self, keyword, value):
+        self.keyword = keyword
+        self.value = value
+
+    def accept(self, visitor):
+        return visitor.visitReturnStmt(self)

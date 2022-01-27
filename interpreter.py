@@ -2,11 +2,15 @@ from token_type import TokenType
 from error import Error
 from custom_runtime_error import CustomRuntimeError
 from environment import Environment
+from lox_callable import LoxCallable, LoxFunction, Clock
+from return_klass import Return
 
 
 class Interpreter:
     def __init__(self):
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = self.globals
+        self.globals.define("clock", Clock())
 
     def interpret(self, statements):
         try:
@@ -95,12 +99,38 @@ class Interpreter:
 
         return self.evaluate(expr.right)
 
+    def visitCallExpr(self, expr):
+        callee = self.evaluate(expr.callee)
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self.evaluate(argument))
+
+        if not isinstance(callee, LoxCallable):
+            raise CustomRuntimeError(expr.paren, "Can only call functions and classes.")
+
+        if len(arguments) != callee.arity():
+            raise CustomRuntimeError(
+                expr.paren,
+                f"Expected {callee.arity()} arguments but got {len(arguments)}.",
+            )
+        return callee.call(self, arguments)
+
     def visitExpressionStmt(self, stmt):
         self.evaluate(stmt.expression)
+
+    def visitFunctionStmt(self, stmt):
+        function = LoxFunction(stmt, self.environment)
+        self.environment.define(stmt.name.lexeme, function)
 
     def visitPrintStmt(self, stmt):
         value = self.evaluate(stmt.expression)
         print(str(value))
+
+    def visitReturnStmt(self, stmt):
+        value = None
+        if stmt.value is not None:
+            value = self.evaluate(stmt.value)
+        raise Return(value)
 
     def visitWhileStmt(self, stmt):
         while isTruthy(self.evaluate(stmt.condition)):

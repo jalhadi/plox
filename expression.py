@@ -1,5 +1,6 @@
 class Expr:
-    pass
+    def accept(self, visitor):
+        raise NotImplementedError
 
 
 class Binary(Expr):
@@ -61,4 +62,14 @@ class Logical(Expr):
         self.right = right
 
     def accept(self, visitor):
-        return visitor.visitLoicalOperator(self)
+        return visitor.visitLogicalExpr(self)
+
+
+class Call(Expr):
+    def __init__(self, callee, paren, arguments):
+        self.callee = callee
+        self.paren = paren
+        self.arguments = arguments
+
+    def accept(self, visitor):
+        return visitor.visitCallExpr(self)
