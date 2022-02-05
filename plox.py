@@ -4,6 +4,7 @@ from ast_printer import AstPrinter
 from scanner import Scanner
 from parser import Parser
 from interpreter import Interpreter
+from resolver import Resolver
 
 
 class Lox:
@@ -26,7 +27,12 @@ class Lox:
         statements = parser.parse()
         if Error.hadError:
             return
-        # Implement AstPrinter
+
+        resolver = Resolver(self.interpreter)
+        resolver.resolve(statements)
+        if Error.hadError:
+            return
+
         self.interpreter.interpret(statements)
 
     def runFile(self, filePath):

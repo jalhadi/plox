@@ -10,7 +10,7 @@ class Error:
 
     def runtimeError(error):
         print("{}\n[line {}]".format(error.message, error.token.line))
-        hadRuntimeError = True
+        Error.hadRuntimeError = True
 
     def tokenError(token, message):
         if token.type == TokenType.EOF:
@@ -20,4 +20,4 @@ class Error:
 
     def report(line, where, message):
         print("[{}] Error {}: {}".format(line, where, message))
-        hadError = True
+        Error.hadError = True

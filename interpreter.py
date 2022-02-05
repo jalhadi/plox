@@ -2,7 +2,8 @@ from token_type import TokenType
 from error import Error
 from custom_runtime_error import CustomRuntimeError
 from environment import Environment
-from lox_callable import LoxCallable, LoxFunction, Clock
+from lox_callable import LoxCallable, Clock
+from lox_function import LoxFunction
 from return_klass import Return
 
 
@@ -11,6 +12,7 @@ class Interpreter:
         self.globals = Environment()
         self.environment = self.globals
         self.globals.define("clock", Clock())
+        self.locals = {}
 
     def interpret(self, statements):
         try:
@@ -21,6 +23,9 @@ class Interpreter:
 
     def execute(self, stmt):
         stmt.accept(self)
+
+    def resolve(self, expr, depth):
+        self.locals[expr] = depth
 
     def evaluate(self, expr):
         return expr.accept(self)
@@ -45,7 +50,13 @@ class Interpreter:
         return None
 
     def visitVariableExpr(self, expr):
-        return self.environment.get(expr.name)
+        return self.lookUpVariable(expr.name, expr)
+
+    def lookUpVariable(self, name, expr):
+        distance = self.locals.get(expr)
+        if distance is not None:
+            return self.environment.getAt(distance, name.lexeme)
+        return self.globals.get(name)
 
     def visitBinaryExpr(self, expr):
         left = self.evaluate(expr.left)
@@ -145,8 +156,11 @@ class Interpreter:
 
     def visitAssignExpr(self, expr):
         value = self.evaluate(expr.value)
-        self.environment.assign(expr.name, value)
-        return value
+        distance = self.locals.get(expr)
+        if distance is not None:
+            self.environment.assignAt(distance, expr.name, value)
+        else:
+            self.globals.assign(expr.name, value)
 
     def visitBlockStmt(self, stmt):
         self.executeBlock(stmt.statements, Environment(enclosing=self.environment))
