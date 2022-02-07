@@ -72,3 +72,12 @@ class Return(Stmt):
 
     def accept(self, visitor):
         return visitor.visitReturnStmt(self)
+
+
+class Class(Stmt):
+    def __init__(self, name, methods):
+        self.name = name
+        self.methods = methods
+
+    def accept(self, visitor):
+        return visitor.visitClassStmt(self)

@@ -1,0 +1,10 @@
+class Pizza {
+    init(cheese, crust) {
+        this.cheese = cheese;
+        this.crust = crust;
+    }
+}
+
+var my_pizza = Pizza("Parmesan", "Butter");
+print my_pizza.cheese;
+print my_pizza.crust;

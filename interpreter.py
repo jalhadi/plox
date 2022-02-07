@@ -5,6 +5,8 @@ from environment import Environment
 from lox_callable import LoxCallable, Clock
 from lox_function import LoxFunction
 from return_klass import Return
+from lox_class import LoxClass
+from lox_instance import LoxInstance
 
 
 class Interpreter:
@@ -110,6 +112,18 @@ class Interpreter:
 
         return self.evaluate(expr.right)
 
+    def visitSetExpr(self, expr):
+        obj = self.evaluate(expr.object)
+        if not isinstance(obj, LoxInstance):
+            raise CustomRuntimeError(expr.name, "Only instances have fields.")
+
+        value = self.evaluate(expr.value)
+        obj.set(expr.name, value)
+        return value
+
+    def visitThisExpr(self, expr):
+        return self.lookUpVariable(expr.keyword, expr)
+
     def visitCallExpr(self, expr):
         callee = self.evaluate(expr.callee)
         arguments = []
@@ -126,11 +140,18 @@ class Interpreter:
             )
         return callee.call(self, arguments)
 
+    def visitGetExpr(self, expr):
+        obj = self.evaluate(expr.object)
+        if isinstance(obj, LoxInstance):
+            return obj.get(expr.name)
+
+        raise CustomRuntimeError(expr.name, "Only instances have properties.")
+
     def visitExpressionStmt(self, stmt):
         self.evaluate(stmt.expression)
 
     def visitFunctionStmt(self, stmt):
-        function = LoxFunction(stmt, self.environment)
+        function = LoxFunction(stmt, self.environment, False)
         self.environment.define(stmt.name.lexeme, function)
 
     def visitPrintStmt(self, stmt):
@@ -164,6 +185,19 @@ class Interpreter:
 
     def visitBlockStmt(self, stmt):
         self.executeBlock(stmt.statements, Environment(enclosing=self.environment))
+
+    def visitClassStmt(self, stmt):
+        self.environment.define(stmt.name.lexeme, None)
+        methods = {}
+        for method in stmt.methods:
+            function = LoxFunction(
+                method,
+                self.environment,
+                method.name.lexeme == "init",
+            )
+            methods[method.name.lexeme] = function
+        klass = LoxClass(stmt.name.lexeme, methods)
+        self.environment.assign(stmt.name, klass)
 
     def visitIfStmt(self, stmt):
         if isTruthy(self.evaluate(stmt.condition)):

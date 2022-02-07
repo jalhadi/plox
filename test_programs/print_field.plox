@@ -1,0 +1,4 @@
+class Pizza {}
+var pizza = Pizza();
+pizza.cheese = "Mozzarella";
+print pizza.cheese; // Prints  "Mozzarella"

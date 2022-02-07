@@ -11,9 +11,6 @@ class LoxCallable:
     def arity(self):
         raise NotImplementedError
 
-    def toString(self):
-        raise NotImplementedError
-
 
 # Native functions
 class Clock:
@@ -23,5 +20,5 @@ class Clock:
     def arity(self):
         return 0
 
-    def toString(self):
+    def __str__(self):
         return "<native fn>"
