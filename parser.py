@@ -1,4 +1,14 @@
-from stmt import Print, Expression, Var, Block, If, While, Function, Return, Class
+from stmt import (
+    Print,
+    Expression,
+    Var,
+    Block,
+    If,
+    While,
+    Function,
+    Return,
+    Class,
+)
 from expression import (
     Binary,
     Unary,
@@ -11,6 +21,7 @@ from expression import (
     Get,
     Set,
     This,
+    Super,
 )
 from token_type import TokenType
 from error import Error
@@ -45,6 +56,11 @@ class Parser:
 
     def classDeclaration(self):
         name = self.consume(TokenType.IDENTIFIER, "Expect class name.")
+        superclass = None
+        if self.match(TokenType.LESS):
+            self.consume(TokenType.IDENTIFIER, "Expect superclass name.")
+            superclass = Variable(self.previous())
+
         self.consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
 
         methods = []
@@ -52,7 +68,7 @@ class Parser:
             methods.append(self.function("method"))
 
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
-        return Class(name, methods)
+        return Class(name, superclass, methods)
 
     def function(self, kind):
         name = self.consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
@@ -297,7 +313,13 @@ class Parser:
             return Literal(None)
         if self.match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self.previous().literal)
-
+        if self.match(TokenType.SUPER):
+            keyword = self.previous()
+            self.consume(TokenType.DOT, "Expect ',' after 'super',")
+            method = self.consume(
+                TokenType.IDENTIFIER, "Exxpect superclass method name."
+            )
+            return Super(keyword, method)
         if self.match(TokenType.THIS):
             return This(self.previous())
         if self.match(TokenType.IDENTIFIER):

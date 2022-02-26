@@ -14,6 +14,7 @@ class FunctionType(Enum):
 class ClassType(Enum):
     NONE = auto()
     CLASS = auto()
+    SUBCLASS = auto()
 
 
 class Resolver:
@@ -34,6 +35,22 @@ class Resolver:
         self.declare(stmt.name)
         self.define(stmt.name)
 
+        if (
+            stmt.superclass is not None
+            and stmt.name.lexeme == stmt.superclass.name.lexeme
+        ):
+            Error.tokenError(
+                stmt.superclass.name, "A class can't inherrit from itself."
+            )
+
+        if stmt.superclass is not None:
+            self.currentClass = ClassType.SUBCLASS
+            self.resolve(stmt.superclass)
+
+        if stmt.superclass is not None:
+            self.beginScope()
+            self.scopes[-1]["super"] = True
+
         self.beginScope()
         self.scopes[-1]["this"] = True
 
@@ -44,6 +61,8 @@ class Resolver:
             self.resolveFunction(method, FunctionType.METHOD)
 
         self.endScope()
+        if stmt.superclass is not None:
+            self.endScope()
         self.currentClass = enclosingClass
 
     def resolve(self, obj):
@@ -146,6 +165,16 @@ class Resolver:
     def visitSetExpr(self, expr):
         self.resolve(expr.value)
         self.resolve(expr.object)
+
+    def visitSuperExpr(self, expr):
+        if self.currentClass == ClassType.NONE:
+            Error.tokenError(expr.keyword, "Can't use 'super' outside of a class.")
+        if self.currentClass == ClassType.CLASS:
+            Error.tokenError(
+                expr.keyword, "Can't use 'super' in a class with no superclass."
+            )
+
+        self.resolveLocal(expr, expr.keyword)
 
     def visitThisExpr(self, expr):
         if self.currentClass == ClassType.NONE:

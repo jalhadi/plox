@@ -121,6 +121,18 @@ class Interpreter:
         obj.set(expr.name, value)
         return value
 
+    def visitSuperExpr(self, expr):
+        distance = self.locals.get(expr)
+        superclass = self.environment.getAt(distance, "super")
+        obj = self.environment.getAt(distance - 1, "this")
+
+        method = superclass.findMethod(expr.method.lexeme)
+        if method is None:
+            raise CustomRuntimeError(
+                expr.method, f"Undefined property '{expr.method.name}'."
+            )
+        return method.bind(obj)
+
     def visitThisExpr(self, expr):
         return self.lookUpVariable(expr.keyword, expr)
 
@@ -187,7 +199,20 @@ class Interpreter:
         self.executeBlock(stmt.statements, Environment(enclosing=self.environment))
 
     def visitClassStmt(self, stmt):
+        superclass = None
+        if stmt.superclass is not None:
+            superclass = self.evaluate(stmt.superclass)
+            if not isinstance(superclass, LoxClass):
+                raise CustomRuntimeError(
+                    stmt.superclass.name, "Superclass must be a class."
+                )
+
         self.environment.define(stmt.name.lexeme, None)
+
+        if stmt.superclass is not None:
+            self.environment = Environment(self.environment)
+            self.environment.define("super", superclass)
+
         methods = {}
         for method in stmt.methods:
             function = LoxFunction(
@@ -196,7 +221,11 @@ class Interpreter:
                 method.name.lexeme == "init",
             )
             methods[method.name.lexeme] = function
-        klass = LoxClass(stmt.name.lexeme, methods)
+        klass = LoxClass(stmt.name.lexeme, superclass, methods)
+
+        if superclass is not None:
+            self.environment = self.environment.enclosing
+
         self.environment.assign(stmt.name, klass)
 
     def visitIfStmt(self, stmt):

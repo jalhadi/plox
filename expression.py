@@ -100,3 +100,12 @@ class This(Expr):
 
     def accept(self, visitor):
         return visitor.visitThisExpr(self)
+
+
+class Super(Expr):
+    def __init__(self, keyword, method):
+        self.keyword = keyword
+        self.method = method
+
+    def accept(self, visitor):
+        return visitor.visitSuperExpr(self)

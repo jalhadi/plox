@@ -3,8 +3,9 @@ from lox_instance import LoxInstance
 
 
 class LoxClass(LoxCallable):
-    def __init__(self, name, methods):
+    def __init__(self, name, superclass, methods):
         self.name = name
+        self.superclass = superclass
         self.methods = methods
 
     def call(self, interpreter, arguments):
@@ -15,7 +16,11 @@ class LoxClass(LoxCallable):
         return instance
 
     def findMethod(self, name):
-        return self.methods.get(name)
+        if name in self.methods:
+            return self.methods[name]
+
+        if self.superclass is not None:
+            return self.superclass.findMethod(name)
 
     def arity(self):
         initializer = self.findMethod("init")
